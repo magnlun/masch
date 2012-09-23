@@ -27,5 +27,8 @@ public class ScrollText extends JPanel{
 	public void removePlayer(String Player){
 		textPane.removePlayer(Player);
 	}
+	public void addPlayer(String Player){
+		textPane.addPlayer(Player);
+	}
 
 }

@@ -82,16 +82,29 @@ public class Spel {
 		HashMap<String, String> rc = new HashMap<String,String>();
 		for(int i = 0; i < message.length(); i++){
 			String temp = "-";
-			if(message.charAt(i) == '-' && message.charAt(i+1) != 'm'){
-				temp += message.charAt(i+1);
-				String temp2 = "";
-				for(int j = i+2; j < message.length() && message.charAt(j) != '¤'; j++){
-					temp2 += message.charAt(j);
+			if(message.charAt(i) == '-'){
+				i++;
+				while(message.charAt(i) != ' '){
+					temp += message.charAt(i);
+					i++;
 				}
-				rc.put(temp,temp2);
+				if(!temp.equals("-m")){
+					String temp2 = "";
+					for(int j = i + 1; j < message.length() && message.charAt(j) != '¤'; j++){
+						temp2 += message.charAt(j);
+					}
+					rc.put(temp,temp2);
+					System.out.println(temp2);
+					System.out.println(temp);
+				}
 			}
 		}
 		return rc;
+	}
+	
+	public void challengePlayer(String player){
+		ut.println("¤"+player);
+		ut.flush();
 	}
 	
 	public static String findMessage(String message){
@@ -135,19 +148,36 @@ class chat extends Thread{
 					spelare.recieveChat(command);
 				}
 				else if(command.charAt(0) == 'u'){
-					if(command.charAt(1) == 'a')
+					if(command.charAt(1) == 'a'){
 						spelare.addPlayer(command.substring(3));
+					}
 					else if(command.charAt(1) == 'r')
 						spelare.removePlayer(command.substring(3));
 				}
 				else if(command.charAt(0) == '%'){
-					spelare.changeName();
+					if(command.charAt(1) == '%')
+						spelare.changeName();
+					else
+						spelare.chat.setVisible(true);
 				}
 				else if(command.equals("Die")||command.equals("Vinst")){
 					break;
 				}
-				else{
+				else if(command.charAt(0) == 'm'){
 					spelare.addToQueue(command.substring(1));
+				}
+				else if(command.charAt(0) == '§'){
+					spelare.ut.println("§" + command.substring(1));
+					spelare.ut.flush();
+				}
+				else if(command.charAt(0) == 'r'){
+					spelare.ut.println('r');
+					spelare.ut.flush();
+				}
+				else{
+					System.err.println(command);
+					System.err.println("Någon har glömt en flagga");
+					System.exit(7);
 				}
 			} 
 			catch (IOException e) {

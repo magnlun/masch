@@ -24,7 +24,9 @@ public class textField extends JTextPane{
 	 */
 	void addText(String Text, String Name){
 	    StyleContext sc = StyleContext.getDefaultStyleContext();
-	    AttributeSet aset = sc.addAttribute(SimpleAttributeSet.EMPTY,StyleConstants.Foreground, Color.black);	//Skapar textens attribut
+		SimpleAttributeSet attributes = new SimpleAttributeSet();
+	    StyleConstants.setItalic(attributes, false);
+	    AttributeSet aset = sc.addAttribute(attributes, StyleConstants.Foreground, Color.black);	//Skapar textens attribut
 	    setCharacterAttributes(aset, false);
 	    setCaretPosition(getDocument().getLength());	//Säger att den ska skriva sist i dokumentet
 	    setEditable(true);
@@ -57,16 +59,27 @@ public class textField extends JTextPane{
 	    setEditable(false);
 	}
 	
-	public void removePlayer(String Player){
+	public void write(){
 		SimpleAttributeSet attributes = new SimpleAttributeSet();
 	    StyleConstants.setItalic(attributes, true);
 		StyleContext sc = StyleContext.getDefaultStyleContext();
-	    AttributeSet aset = sc.addAttribute(attributes,StyleConstants.Foreground, Color.gray);	//Skapar textens attribut
+	    AttributeSet aset = sc.addAttribute(attributes, StyleConstants.Foreground, Color.gray);	//Skapar textens attribut
 	    setCharacterAttributes(aset, false);
 	    setCaretPosition(getDocument().getLength());	//Säger att den ska skriva sist i dokumentet
 	    setEditable(true);
+	}
+	
+	public void removePlayer(String Player){
+		write();
 	    replaceSelection(Player + " har loggat ut\n");		//Skriver ut användarens namn
 	    setEditable(false);
+	}
+	
+	public void addPlayer(String Player){
+		write();
+	    replaceSelection(Player + " har loggat in\n");		//Skriver ut användarens namn
+	    setEditable(false);
+		
 	}
 	
 }

@@ -4,6 +4,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.HashMap;
 
 import javax.swing.JComboBox;
@@ -20,12 +22,12 @@ import komponenter.HintTextField;
 import komponenter.ScrollText;
 
 
-public class Lobby extends JFrame implements ChatWindow, ActionListener{
+public class Lobby extends JFrame implements ChatWindow, ActionListener, MouseListener{
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	ScrollText text;
+	ScrollText text = new ScrollText();
 	Spel spel;
 	DefaultTableModel model = new DefaultTableModel();
 	HintTextField chatt;
@@ -41,7 +43,6 @@ public class Lobby extends JFrame implements ChatWindow, ActionListener{
 		setLayout(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
 		c.gridwidth = 2;
-		text = new ScrollText();
 		add(text,c);
 		c.fill = GridBagConstraints.HORIZONTAL;
 		chatt = new HintTextField("Chatta här");
@@ -59,8 +60,8 @@ public class Lobby extends JFrame implements ChatWindow, ActionListener{
 		c.gridheight = 2;
 		add(t,c);
 		pack();
-		setVisible(true);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		t.addMouseListener(this);
 	}
 	
 	public void fillCombo(){
@@ -95,12 +96,15 @@ public class Lobby extends JFrame implements ChatWindow, ActionListener{
 		for(int i = 0; i < t.getRowCount(); i++){
 			if(t.getValueAt(i, 0).equals(player)){
 				model.removeRow(i);
+				text.removePlayer(player);
+				break;
 			}
 		}
-		text.removePlayer(player);
 	}
 	
 	public void addPlayers(String player){
+		System.out.println(player);
+		text.addPlayer(player);
 		model.addRow(new Object[] {player});
 	}
 	
@@ -130,5 +134,36 @@ public class Lobby extends JFrame implements ChatWindow, ActionListener{
 			spel.sendChat(chatt.getText());
 			chatt.setText("");
 		}
+	}
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+		int row = t.rowAtPoint(e.getPoint());
+		int col = t.columnAtPoint(e.getPoint());
+		spel.challengePlayer((String) t.getValueAt(row, col));
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
 }
