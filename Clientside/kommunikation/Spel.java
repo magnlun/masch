@@ -61,7 +61,7 @@ public class Spel {
 		 */
 		HashMap<String,String> flags = findFlags(message);
 		String mess = findMessage(message);
-		chat.reciveChat(mess, flags.get("-n"));
+		chat.reciveChat(mess, flags);
 	}	
 	
 	public void removePlayer(String name){
@@ -94,8 +94,6 @@ public class Spel {
 						temp2 += message.charAt(j);
 					}
 					rc.put(temp,temp2);
-					System.out.println(temp2);
-					System.out.println(temp);
 				}
 			}
 		}

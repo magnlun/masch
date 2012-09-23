@@ -83,8 +83,8 @@ public class Lobby extends JFrame implements ChatWindow, ActionListener, MouseLi
 	}
 	
 	@Override
-	public void reciveChat(String message, String Name) {
-		text.addText(message, Name);
+	public void reciveChat(String message, HashMap<String,String> flags) {
+		text.addText(message, flags.get("-n"));
 	}
 	/**
 	 * Removes a player from the list of connected players in the lobby
@@ -126,6 +126,7 @@ public class Lobby extends JFrame implements ChatWindow, ActionListener, MouseLi
 		if(e.getSource() == combo){
 			if(ändra){
 				chatt.appendText("¤Color="+colorMap.get(combo.getSelectedItem())+"¤");
+				combo.setSelectedIndex(0);
 				chatt.requestFocus();
 			}
 			ändra = !ändra;
