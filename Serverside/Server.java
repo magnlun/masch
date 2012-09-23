@@ -72,26 +72,28 @@ class ClientHandler extends Thread {
 			ut = new PrintWriter(socket.getOutputStream());
 			name = in.readLine();
 			while(server.contains(name)){
-				ut.println("%");
+				ut.println("%%");
 				ut.flush();
 				name = in.readLine();
 			}
+			ut.println("%g");
+			ut.flush();
 			Iterator<Socket> iterator = server.socketsOnline();
 			while(iterator.hasNext()){
 				Socket soc = iterator.next();
-				PrintWriter ut = new PrintWriter(soc.getOutputStream());
-				ut.println("ua " + name);
-				ut.flush();
+				PrintWriter uta = new PrintWriter(soc.getOutputStream());
+				uta.println("ua " + name);
+				uta.flush();
 			}
 			server.addUser(socket, this, name);
 			Iterator<String> itr = server.usersOnline();
 			while(itr.hasNext()){
 				String temp = itr.next();
 				if(!temp.equals(name)){
-					ut.println("ua " + temp);
+					this.ut.println("ua " + temp);
+					this.ut.flush();
 				}
 			}
-			ut.flush();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -129,6 +131,7 @@ class ClientHandler extends Thread {
 		try {
 			while(true){
 				String indata = in.readLine();
+				System.out.println(indata);
 				if(indata.equals("exit")){
 					//Remove the listener for this packet
 					removePlayer();
@@ -160,7 +163,6 @@ class ClientHandler extends Thread {
 					//¤Magnus
 					String name = indata.substring(1);
 					addOpponent(server.getHandler(name),server.getSocket(name));
-					removePlayer();
 					opponentWriter.println("§"+this.name);
 					opponentWriter.flush();
 				}
@@ -170,12 +172,19 @@ class ClientHandler extends Thread {
 					String name = indata.substring(1);
 					addOpponent(server.getHandler(name),server.getSocket(name));
 					removePlayer();
+					opponentWriter.println("r");
+					opponentWriter.flush();
 				}
 				else if(indata.charAt(0) == 'c'){
 					//Message that should be sent to the clients for translation
 					//c(data)
+					ut.println(indata.substring(1));
+					ut.flush();
 					opponentWriter.println(indata.substring(1));
 					opponentWriter.flush();
+				}
+				else if(indata.charAt(0) == 'r'){
+					removePlayer();
 				}
 				else{
 					System.err.println(indata);
