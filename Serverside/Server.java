@@ -6,18 +6,43 @@ import java.io.*;
 public class Server {
 	HashMap<String,Socket> sockets = new HashMap<String,Socket>();
 	HashMap<String,ClientHandler> ClientHandlers = new HashMap<String,ClientHandler>();
+	Socket alternativeServer;
 	Server(){
 		try {
 			@SuppressWarnings("resource")
 			ServerSocket sock = new ServerSocket(5555, 100);
+			Runtime.getRuntime().addShutdownHook(new Thread() {
+			    public void run() { shutdown(); }  //If the server tries to shut down unexpecedly it will run shutdown() first
+			});
 			while (true){
 				Socket temp = sock.accept();
 				ClientHandler temp2 = new ClientHandler(temp, this);
 				temp2.start();
 			}
 		} 
-		catch (IOException e) {
+		catch (Exception e) {
+			shutdown();
 			e.printStackTrace();
+		}
+	}
+	
+	public void shutdown(){
+		if(alternativeServer == null){
+			//No alternative server is known so the server will just die
+			messageToAllPlayers("Die");
+			Iterator<Socket> itr = socketsOnline();
+			while(itr.hasNext()){
+				Socket sock = itr.next();
+				try {
+					sock.close();
+				} catch (IOException e) {
+					//Try to close it
+				}
+			}
+		}
+		else{
+			messageToAllPlayers("p"+alternativeServer.getPort());
+			messageToAllPlayers(""+alternativeServer.getLocalSocketAddress());
 		}
 	}
 	
@@ -51,6 +76,26 @@ public class Server {
 	
 	public static void main(String[] args) {
 		new Server();
+	}
+	
+	public void messageToAllPlayers(String message){
+		try{
+			Iterator<Socket> itr = socketsOnline();
+			while(itr.hasNext()){
+				Socket socket = itr.next();
+				PrintWriter temp = new PrintWriter(socket.getOutputStream());
+				temp.println(message);
+				temp.flush();
+			}
+			Iterator<ClientHandler> iterator = ClientHandlers.values().iterator();
+			while(iterator.hasNext()){
+				iterator.next().close();
+			}
+		}
+		catch(Exception e){
+			
+		}
+		
 	}
 }
 
@@ -99,6 +144,18 @@ class ClientHandler extends Thread {
 		}
 	}
 	
+	public void close(){
+		try{
+			in.close();
+			ut.close();
+			opponentReader.close();
+			opponentWriter.close();
+		}
+		catch(Exception e){
+			//try at least
+		}
+	}
+	
 	public void removePlayer(){
 		server.removeUser(name);
 		try{
@@ -142,13 +199,7 @@ class ClientHandler extends Thread {
 				else if(opponentWriter == null && indata.charAt(0) == 'c'){
 					//Packet for all the other players in the Lobby (Chat probably)
 					//c(data)
-					Iterator<Socket> itr = server.socketsOnline();
-					while(itr.hasNext()){
-						Socket socket = itr.next();
-						PrintWriter temp = new PrintWriter(socket.getOutputStream());
-						temp.println(indata.substring(1));
-						temp.flush();
-					}
+					server.messageToAllPlayers(indata.substring(1));
 				}
 				else if(indata.equals("Vinst")){
 					//Player A have won and tells player B
