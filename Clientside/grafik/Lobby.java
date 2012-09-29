@@ -103,9 +103,8 @@ public class Lobby extends JFrame implements ChatWindow, ActionListener, MouseLi
 	}
 	
 	public void addPlayers(String player){
-		System.out.println(player);
 		text.addPlayer(player);
-		model.addRow(new Object[] {player});
+		model.addRow(new Object[] {player.substring(1)});
 	}
 	
 	public void dispose(){

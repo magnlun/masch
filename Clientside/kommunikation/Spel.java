@@ -24,7 +24,9 @@ public class Spel {
 	ChatWindow chat;
 	String name;
 	Socket sock;
-	final int port = 5554;
+	final int port = 5555;
+	String opponent = "";
+	boolean challenger = false;
 	
 	public Spel(ChatWindow chat, String Name){
 		try{
@@ -111,6 +113,8 @@ public class Spel {
 	}
 	
 	public void challengePlayer(String player){
+		opponent = player;
+		challenger = true;
 		ut.println("¤"+player);
 		ut.flush();
 	}
@@ -131,6 +135,16 @@ public class Spel {
 		name = JOptionPane.showInputDialog("Tyvärr är namnet upptaget, välj ett nytt");
 		ut.println(name);
 		ut.flush();
+	}
+	
+	public void reconnect(Socket socket) throws IOException{
+		sock = socket;
+		ut = new PrintWriter(socket.getOutputStream());
+		ut.println(name);
+		ut.flush();
+		if(opponent.length() > 0 && challenger){
+			challengePlayer(opponent);
+		}
 	}
 
 }
@@ -160,10 +174,10 @@ class chat extends Thread{
 				}
 				else if(command.charAt(0) == 'u'){
 					if(command.charAt(1) == 'a'){
-						spelare.addPlayer(command.substring(3));
+						spelare.addPlayer(command.substring(2));
 					}
 					else if(command.charAt(1) == 'r')
-						spelare.removePlayer(command.substring(3));
+						spelare.removePlayer(command.substring(2));
 				}
 				else if(command.charAt(0) == '%'){
 					if(command.charAt(1) == '%')
@@ -178,6 +192,7 @@ class chat extends Thread{
 					spelare.addToQueue(command.substring(1));
 				}
 				else if(command.charAt(0) == '§'){
+					spelare.opponent = command.substring(1);
 					spelare.ut.println("§" + command.substring(1));
 					spelare.ut.flush();
 				}
@@ -190,9 +205,7 @@ class chat extends Thread{
 					String ip = rd.readLine().substring(1);
 					socket = new Socket(ip, Integer.parseInt(port));
 					rd = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-					spelare.ut = new PrintWriter(socket.getOutputStream());
-					spelare.ut.println(spelare.name);
-					spelare.ut.flush();
+					spelare.reconnect(socket);
 				}
 				else{
 					System.err.println(command);

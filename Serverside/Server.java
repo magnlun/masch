@@ -191,7 +191,7 @@ class ClientHandler extends Thread {
 				while(iterator.hasNext()){
 					Socket soc = iterator.next();
 					PrintWriter uta = new PrintWriter(soc.getOutputStream());
-					uta.println("ua " + name);
+					uta.println("uas" + name);
 					uta.flush();
 				}
 				server.addUser(socket, this, name);
@@ -200,7 +200,7 @@ class ClientHandler extends Thread {
 			while(itr.hasNext()){
 				String temp = itr.next();
 				if(!temp.equals(name)){
-					this.ut.println("ua " + temp);
+					this.ut.println("uaq" + temp);
 					this.ut.flush();
 				}
 			}
@@ -228,7 +228,7 @@ class ClientHandler extends Thread {
 			while(iterator.hasNext()){
 				Socket soc = iterator.next();
 				PrintWriter ut = new PrintWriter(soc.getOutputStream());
-				ut.println("ur " + name);
+				ut.println("ur" + name);
 				ut.flush();
 			}
 		}

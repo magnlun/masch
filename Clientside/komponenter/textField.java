@@ -76,9 +76,11 @@ public class textField extends JTextPane{
 	}
 	
 	public void addPlayer(String Player){
-		write();
-	    replaceSelection(Player + " har loggat in\n");		//Skriver ut användarens namn
-	    setEditable(false);
+		if(Player.charAt(0) == 's'){
+			write();
+		    replaceSelection(Player.substring(1) + " har loggat in\n");		//Skriver ut användarens namn
+		    setEditable(false);
+		}
 		
 	}
 	
