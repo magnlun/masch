@@ -23,13 +23,15 @@ public class Spel {
 	PrintWriter ut;
 	ChatWindow chat;
 	String name;
+	Socket sock;
+	final int port = 5554;
 	
 	public Spel(ChatWindow chat, String Name){
 		try{
-			Socket socket = new Socket("192.168.0.11",5555);
-			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			ut = new PrintWriter(socket.getOutputStream());
-			new chat(this, socket).start();
+			sock = new Socket("192.168.0.11",port);
+			in = new BufferedReader(new InputStreamReader(sock.getInputStream()));
+			ut = new PrintWriter(sock.getOutputStream());
+			new chat(this, sock).start();
 			this.chat = chat;
 			ut.println(Name);
 			ut.flush();
@@ -44,7 +46,7 @@ public class Spel {
 		kö.add(string);
 	} 
 	
-	public void quit(Socket sock){
+	public void quit(){
 		ut.println("exit");
 		ut.flush();
 		ut.close();
@@ -135,7 +137,6 @@ public class Spel {
 
 class chat extends Thread{
 	BufferedReader rd;
-	PrintWriter ut;
 	Spel spelare;
 	Socket socket;
 	chat(Spel spelare, Socket socket){
@@ -143,7 +144,6 @@ class chat extends Thread{
 		this.socket = socket;
 		try{
 			rd = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			ut = new PrintWriter(socket.getOutputStream());
 		}
 		catch(Exception err){
 			err.printStackTrace();
@@ -190,21 +190,22 @@ class chat extends Thread{
 					String ip = rd.readLine().substring(1);
 					socket = new Socket(ip, Integer.parseInt(port));
 					rd = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-					ut = new PrintWriter(socket.getOutputStream());
+					spelare.ut = new PrintWriter(socket.getOutputStream());
+					spelare.ut.println(spelare.name);
+					spelare.ut.flush();
 				}
 				else{
 					System.err.println(command);
 					System.err.println("Någon har glömt en flagga");
-					spelare.quit(socket);
+					spelare.quit();
 					System.exit(7);
 				}
 			} 
 			catch (IOException e) {
-				spelare.quit(socket);
-				e.printStackTrace();
-				System.exit(7);
+				spelare.quit();
+				System.exit(0);
 			}
 		}
-		spelare.quit(socket);
+		spelare.quit();
 	}
 }

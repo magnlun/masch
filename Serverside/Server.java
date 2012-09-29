@@ -1,29 +1,42 @@
 import java.net.*;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Scanner;
 import java.io.*;
 
-public class Server {
+public class Server extends Thread{
 	HashMap<String,Socket> sockets = new HashMap<String,Socket>();
 	HashMap<String,ClientHandler> ClientHandlers = new HashMap<String,ClientHandler>();
 	Socket alternativeServer;
+	boolean run = true;
+	final int port = 5555;
+	
 	Server(){
-		try {
-			@SuppressWarnings("resource")
-			ServerSocket sock = new ServerSocket(5555, 100);
 			Runtime.getRuntime().addShutdownHook(new Thread() {
 			    public void run() { shutdown(); }  //If the server tries to shut down unexpecedly it will run shutdown() first
 			});
-			while (true){
+	}
+	
+	public void run(){
+		try {
+			@SuppressWarnings("resource")
+			ServerSocket sock = new ServerSocket(port, 100);
+			while (run){
 				Socket temp = sock.accept();
-				ClientHandler temp2 = new ClientHandler(temp, this);
-				temp2.start();
+				if(run){
+					ClientHandler temp2 = new ClientHandler(temp, this);
+					temp2.start();
+				}
 			}
 		} 
 		catch (Exception e) {
 			shutdown();
 			e.printStackTrace();
 		}
+	}
+	
+	public void causeException(){
+		throw new NullPointerException();
 	}
 	
 	public void shutdown(){
@@ -42,8 +55,23 @@ public class Server {
 		}
 		else{
 			messageToAllPlayers("p"+alternativeServer.getPort());
-			messageToAllPlayers(""+alternativeServer.getLocalSocketAddress());
+			messageToAllPlayers(""+alternativeServer.getLocalAddress());
+			Iterator<Socket> itr = socketsOnline();
+			while(itr.hasNext()){
+				Socket sock = itr.next();
+				try {
+					sock.close();
+				} catch (IOException e) {
+					//Try to close it
+				}
+			}
 		}
+		
+		run = false;
+		try{
+			new Socket("127.0.0.1",port);  //Prevents the server from waiting for a connection
+		}
+		catch(Exception e){}
 	}
 	
 	public void addUser(Socket socket, ClientHandler CH, String name){
@@ -74,8 +102,46 @@ public class Server {
 		return sockets.containsKey(user);
 	}
 	
+	public void addServer(String ip, int port){
+		try {
+			this.alternativeServer = new Socket(ip, port);
+			PrintWriter PW = new PrintWriter(alternativeServer.getOutputStream());
+			PW.println("Server");
+			PW.flush();
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public static void main(String[] args) {
-		new Server();
+		Server server = new Server();
+		Scanner sc = new Scanner(System.in);
+		server.start();
+		while(true){
+			String command = sc.nextLine();
+			String[] words = command.split(" ");
+			if(words.length == 3 && words[0].equals("add")){
+				try{
+					server.addServer(words[1], Integer.parseInt(words[2]));
+				}
+				catch(Exception e){
+					System.err.println("Unkown command");
+				}
+			}
+			else if(command.equals("except")){
+				break;
+			}
+			else if(command.equals("quit")){
+				break;
+			}
+			else{
+				System.err.println("Unkown command");
+			}
+		}
+		server.shutdown();
+		sc.close();
 	}
 	
 	public void messageToAllPlayers(String message){
@@ -86,10 +152,6 @@ public class Server {
 				PrintWriter temp = new PrintWriter(socket.getOutputStream());
 				temp.println(message);
 				temp.flush();
-			}
-			Iterator<ClientHandler> iterator = ClientHandlers.values().iterator();
-			while(iterator.hasNext()){
-				iterator.next().close();
 			}
 		}
 		catch(Exception e){
@@ -116,6 +178,7 @@ class ClientHandler extends Thread {
 					socket.getInputStream()));
 			ut = new PrintWriter(socket.getOutputStream());
 			name = in.readLine();
+			System.out.println(name);
 			while(server.contains(name)){
 				ut.println("%%");
 				ut.flush();
@@ -123,14 +186,16 @@ class ClientHandler extends Thread {
 			}
 			ut.println("%g");
 			ut.flush();
+			if(!name.equals("Server")){
 			Iterator<Socket> iterator = server.socketsOnline();
-			while(iterator.hasNext()){
-				Socket soc = iterator.next();
-				PrintWriter uta = new PrintWriter(soc.getOutputStream());
-				uta.println("ua " + name);
-				uta.flush();
+				while(iterator.hasNext()){
+					Socket soc = iterator.next();
+					PrintWriter uta = new PrintWriter(soc.getOutputStream());
+					uta.println("ua " + name);
+					uta.flush();
+				}
+				server.addUser(socket, this, name);
 			}
-			server.addUser(socket, this, name);
 			Iterator<String> itr = server.usersOnline();
 			while(itr.hasNext()){
 				String temp = itr.next();
@@ -191,9 +256,9 @@ class ClientHandler extends Thread {
 				System.out.println(indata);
 				if(indata.equals("exit")){
 					//Remove the listener for this packet
-					removePlayer();
 					ut.println("Die");
 					ut.flush();
+					removePlayer();
 					break;
 				}
 				else if(opponentWriter == null && indata.charAt(0) == 'c'){
