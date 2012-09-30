@@ -21,12 +21,15 @@ public class Server extends Thread{
 	public void run(){
 		try(ServerSocket sock = new ServerSocket(port, 100)) {
 			while (run){
-				Socket temp = sock.accept();
-				if(run){
-					ClientHandler temp2 = new ClientHandler(temp, this);
-					temp2.setDaemon(true);
-					temp2.start();
+				try{
+					Socket temp = sock.accept();
+					if(run){
+						ClientHandler temp2 = new ClientHandler(temp, this);
+						temp2.setDaemon(true);
+						temp2.start();
+					}
 				}
+				catch(Exception err){}
 			}
 		} 
 		catch (Exception e) {
@@ -35,14 +38,10 @@ public class Server extends Thread{
 		}
 	}
 	
-	public void causeException(){
-		throw new NullPointerException();
-	}
-	
 	public void shutdown(){
 		if(alternativeServer == null){
 			//No alternative server is known so the server will just die
-			messageToAllPlayers("Die");
+			messageToAllPlayers("Dead");
 		}
 		else{
 			messageToAllPlayers("p"+alternativeServer.getPort());
@@ -95,6 +94,10 @@ public class Server extends Thread{
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public void causeException(){
+		throw new NullPointerException();
 	}
 	
 	public static void main(String[] args) {
