@@ -67,6 +67,16 @@ public class Spel {
 		ut.flush();
 	}
 	
+	public void acceptChallenge(String name){
+		int accept = JOptionPane.showConfirmDialog(chat, name + " vill utmana dig, accepterar du?", "Utmaning", JOptionPane.YES_NO_OPTION); 
+		if(accept == 0){
+			opponent = name;
+			challenger = true;
+			ut.println("¤"+name);
+			ut.flush();
+		}
+	}
+	
 	public void recieveChat(String message){
 		/*
 		 * Flaggfixning här
@@ -113,9 +123,7 @@ public class Spel {
 	}
 	
 	public void challengePlayer(String player){
-		opponent = player;
-		challenger = true;
-		ut.println("¤"+player);
+		ut.println("!"+player);
 		ut.flush();
 	}
 	
@@ -187,8 +195,11 @@ class chat extends Thread{
 					if(command.charAt(1) == 'a'){
 						spelare.addPlayer(command.substring(2));
 					}
-					else if(command.charAt(1) == 'r')
+				else if(command.charAt(1) == 'r')
 						spelare.removePlayer(command.substring(2));
+				}
+				else if(command.charAt(0) == '¤'){
+					spelare.acceptChallenge(command.substring(1));
 				}
 				else if(command.charAt(0) == '%'){
 					if(command.charAt(1) == '%')

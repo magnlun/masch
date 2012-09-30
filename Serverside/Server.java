@@ -259,6 +259,10 @@ class ClientHandler extends Thread {
 					ut.flush();
 					break;
 				}
+				else if(indata.charAt(0) == '!'){
+					server.getHandler(indata.substring(1)).ut.println("¤"+name);
+					server.getHandler(indata.substring(1)).ut.flush();
+				}
 				else if(indata.charAt(0) == '¤'){
 					//A player wants to play and tells the other player
 					//¤Magnus
