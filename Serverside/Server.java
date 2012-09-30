@@ -12,19 +12,19 @@ public class Server extends Thread{
 	final int port = 5555;
 	
 	Server(){
-			Runtime.getRuntime().addShutdownHook(new Thread() {
-			    public void run() { shutdown(); }  //If the server tries to shut down unexpecedly it will run shutdown() first
-			});
+		this.setDaemon(true);
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+			public void run() { shutdown(); }  //If the server tries to shut down unexpecedly it will run shutdown() first
+		});
 	}
 	
 	public void run(){
-		try {
-			@SuppressWarnings("resource")
-			ServerSocket sock = new ServerSocket(port, 100);
+		try(ServerSocket sock = new ServerSocket(port, 100)) {
 			while (run){
 				Socket temp = sock.accept();
 				if(run){
 					ClientHandler temp2 = new ClientHandler(temp, this);
+					temp2.setDaemon(true);
 					temp2.start();
 				}
 			}
@@ -43,28 +43,10 @@ public class Server extends Thread{
 		if(alternativeServer == null){
 			//No alternative server is known so the server will just die
 			messageToAllPlayers("Die");
-			Iterator<Socket> itr = socketsOnline();
-			while(itr.hasNext()){
-				Socket sock = itr.next();
-				try {
-					sock.close();
-				} catch (IOException e) {
-					//Try to close it
-				}
-			}
 		}
 		else{
 			messageToAllPlayers("p"+alternativeServer.getPort());
 			messageToAllPlayers(""+alternativeServer.getLocalAddress());
-			Iterator<Socket> itr = socketsOnline();
-			while(itr.hasNext()){
-				Socket sock = itr.next();
-				try {
-					sock.close();
-				} catch (IOException e) {
-					//Try to close it
-				}
-			}
 		}
 		
 		run = false;
@@ -131,7 +113,7 @@ public class Server extends Thread{
 				}
 			}
 			else if(command.equals("except")){
-				break;
+				server.causeException();
 			}
 			else if(command.equals("quit")){
 				break;

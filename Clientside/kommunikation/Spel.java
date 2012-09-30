@@ -185,7 +185,7 @@ class chat extends Thread{
 					else
 						spelare.chat.setVisible(true);
 				}
-				else if(command.equals("Die")||command.equals("Vinst")){
+				else if(command.equals("Die")){
 					break;
 				}
 				else if(command.charAt(0) == 'm'){
@@ -219,6 +219,6 @@ class chat extends Thread{
 				System.exit(0);
 			}
 		}
-		spelare.quit();
+		System.exit(0);
 	}
 }
