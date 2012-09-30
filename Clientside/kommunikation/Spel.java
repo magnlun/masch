@@ -149,7 +149,7 @@ public class Spel {
 	}
 	
 	public void kill(){
-		JOptionPane.showMessageDialog(chat, "Tyvärr har servern kraschat så du kommer bli utloggad");
+		JOptionPane.showMessageDialog(chat, "Tyvärr har du förlorat kontakten med servern");
 	}
 
 }
@@ -226,6 +226,7 @@ class chat extends Thread{
 			} 
 			catch (IOException e) {
 				spelare.quit();
+				spelare.kill();
 				System.exit(0);
 			}
 		}
