@@ -11,9 +11,10 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
-import other.ChatWindow;
+import other.ChatClass;
 
 
 
@@ -21,14 +22,14 @@ public class Spel {
 	List<String> kö = Collections.synchronizedList(new LinkedList<String>());
 	BufferedReader in;
 	PrintWriter ut;
-	ChatWindow chat;
+	ChatClass chat;
 	String name;
 	Socket sock;
 	final int port = 5555;
 	String opponent = "";
 	boolean challenger = false;
 	
-	public Spel(ChatWindow chat, String Name){
+	public Spel(ChatClass chat, String Name){
 		try{
 			sock = new Socket("192.168.0.11",port);
 			in = new BufferedReader(new InputStreamReader(sock.getInputStream()));
@@ -146,6 +147,10 @@ public class Spel {
 			challengePlayer(opponent);
 		}
 	}
+	
+	public void kill(){
+		JOptionPane.showMessageDialog(chat, "Tyvärr har servern kraschat så du kommer bli utloggad");
+	}
 
 }
 
@@ -169,7 +174,14 @@ class chat extends Thread{
 			String command;
 			try {
 				command = rd.readLine();
-				if(command.charAt(0) == 'c'){
+				if(command.equals("Die")){
+					break;
+				}
+				else if(command.equals("Dead")){
+					spelare.kill();
+					break;
+				}
+				else if(command.charAt(0) == 'c'){
 					spelare.recieveChat(command);
 				}
 				else if(command.charAt(0) == 'u'){
@@ -184,9 +196,6 @@ class chat extends Thread{
 						spelare.changeName();
 					else
 						spelare.chat.setVisible(true);
-				}
-				else if(command.equals("Die")){
-					break;
 				}
 				else if(command.charAt(0) == 'm'){
 					spelare.addToQueue(command.substring(1));
@@ -203,6 +212,7 @@ class chat extends Thread{
 				else if(command.charAt(0) == 'p'){
 					String port = command.substring(1);
 					String ip = rd.readLine().substring(1);
+					spelare.removePlayer(null);
 					socket = new Socket(ip, Integer.parseInt(port));
 					rd = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 					spelare.reconnect(socket);

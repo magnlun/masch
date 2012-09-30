@@ -14,7 +14,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
-import other.ChatWindow;
+import other.ChatClass;
 
 
 import kommunikation.Spel;
@@ -22,7 +22,7 @@ import komponenter.HintTextField;
 import komponenter.ScrollText;
 
 
-public class Lobby extends JFrame implements ChatWindow, ActionListener, MouseListener{
+public class Lobby extends ChatClass implements ActionListener, MouseListener{
 	/**
 	 * 
 	 */
@@ -93,6 +93,12 @@ public class Lobby extends JFrame implements ChatWindow, ActionListener, MouseLi
 	 * 
 	 */
 	public void removePlayers(String player){
+		if(player == null){
+			for(int i = 0; i < t.getRowCount(); i++){
+				model.removeRow(i);
+			}
+			return;
+		}
 		for(int i = 0; i < t.getRowCount(); i++){
 			if(t.getValueAt(i, 0).equals(player)){
 				model.removeRow(i);
