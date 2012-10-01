@@ -253,10 +253,8 @@ class ClientHandler extends Thread {
 				}
 				else if(indata.equals("Vinst")){
 					//Player A have won and tells player B
-					opponentWriter.println("Vinst");
+					opponentWriter.println("Loose");
 					opponentWriter.flush();
-					ut.println("Die");
-					ut.flush();
 					break;
 				}
 				else if(indata.charAt(0) == '!'){

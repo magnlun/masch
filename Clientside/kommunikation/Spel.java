@@ -158,16 +158,20 @@ public class Spel {
 	public void kill(){
 		JOptionPane.showMessageDialog(chat, "Tyvärr har du förlorat kontakten med servern");
 	}
+	
+	public void message(String message){
+		JOptionPane.showMessageDialog(chat, message);
+		chat.dispose();
+		chat = new Lobby(name);
+	}
 
 }
 
 class chat extends Thread{
 	BufferedReader rd;
 	Spel spelare;
-	Socket socket;
 	chat(Spel spelare, Socket socket){
 		this.spelare = spelare;
-		this.socket = socket;
 		try{
 			rd = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		}
@@ -183,6 +187,9 @@ class chat extends Thread{
 				command = rd.readLine();
 				if(command.equals("Die")){
 					break;
+				}
+				else if(command.equals("Loose")){
+					spelare.message("Tyvärr förlorade du");
 				}
 				else if(command.equals("Dead")){
 					spelare.kill();
@@ -223,7 +230,7 @@ class chat extends Thread{
 					String port = command.substring(1);
 					String ip = rd.readLine().substring(1);
 					spelare.removePlayer(null);
-					socket = new Socket(ip, Integer.parseInt(port));
+					Socket socket = new Socket(ip, Integer.parseInt(port));
 					rd = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 					spelare.reconnect(socket);
 				}

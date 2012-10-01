@@ -37,7 +37,7 @@ public class Lobby extends ChatClass implements ActionListener, MouseListener{
 	HashMap<String,String> colorMap = new HashMap<String,String>();
 	boolean ändra = true;
 
-	Lobby(String name){
+	public Lobby(String name){
 		model.addColumn("Online");
 		spel = new Spel(this, name);
 		setLayout(new GridBagLayout());
