@@ -35,14 +35,14 @@ public class Spel {
 			sock = new Socket("192.168.0.11",port);
 			in = new BufferedReader(new InputStreamReader(sock.getInputStream()));
 			ut = new PrintWriter(sock.getOutputStream());
-			new chat(this, sock).start();
 			this.chat = chat;
 			ut.println(Name);
 			ut.flush();
 			ut.println(code);
 			ut.flush();
-			name = Name;
-			offset %= 200000;
+			name = in.readLine().substring(1);
+			new chat(this, sock).start();
+			chat.setVisible(true);
 		}
 		catch(Exception err){
 			err.printStackTrace();
@@ -167,6 +167,13 @@ public class Spel {
 		ut.flush();
 		code += offset;
 	}
+	
+	public void changeName(String name){
+		this.name = name;
+		for(int i = 0; i < name.length(); i++){
+			offset += name.charAt(i) * (i+1);
+		}
+	}
 }
 
 class chat extends Thread{
@@ -190,6 +197,9 @@ class chat extends Thread{
 				if(command.equals("Die")){
 					break;
 				}
+				else if(command.equals("Draw")){
+					spelare.message("Det blev lika!");
+				}
 				else if(command.equals("Loose")){
 					spelare.message("Tyvärr förlorade du");
 				}
@@ -211,11 +221,7 @@ class chat extends Thread{
 					spelare.acceptChallenge(command.substring(1));
 				}
 				else if(command.charAt(0) == '%'){
-					spelare.name = command.substring(2);
-					for(int i = 0; i < spelare.name.length(); i++){
-						spelare.offset += spelare.name.charAt(i) * (i+1);
-					}
-					spelare.chat.setVisible(true);
+					spelare.changeName(command.substring(1));
 				}
 				else if(command.charAt(0) == 'm'){
 					spelare.addToQueue(command.substring(1));

@@ -169,20 +169,11 @@ class ClientHandler extends Thread {
 				return;
 			}
 			code = Long.parseLong(in.readLine());
-			int j = 2;
-			while(server.contains(name)){
-				if(!server.contains(name+j)){
-					name += j;
-					break;
-				}
-				j++;
-			}
-			for(int i = 0; i < name.length(); i++){
-				offset += name.charAt(i) * (i+1);
-			}
-			offset %= 200000;
-			ut.println("%g"+name);
+			name = changeName(name);
+			System.out.println(name);
+			ut.println('%'+name);
 			ut.flush();
+			System.out.println(1);
 			Iterator<Socket> iterator = server.socketsOnline();
 			while(iterator.hasNext()){
 				Socket soc = iterator.next();
@@ -190,7 +181,9 @@ class ClientHandler extends Thread {
 				uta.println("uas" + name);
 				uta.flush();
 			}
+			System.out.println(2);
 			server.addUser(socket, this, name);
+			System.out.println(3);
 			Iterator<String> itr = server.usersOnline();
 			while(itr.hasNext()){
 				String temp = itr.next();
@@ -199,9 +192,26 @@ class ClientHandler extends Thread {
 					this.ut.flush();
 				}
 			}
+			System.out.println(4);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public String changeName(String name){
+		int j = 2;
+		while(server.contains(name)){
+			if(!server.contains(name+j)){
+				name += j;
+				break;
+			}
+			j++;
+		}
+		for(int i = 0; i < name.length(); i++){
+			offset += name.charAt(i) * (i+1);
+		}
+		offset %= 200000;
+		return name;
 	}
 	
 	public void close(){
@@ -295,6 +305,9 @@ class ClientHandler extends Thread {
 					removePlayer();
 					opponentWriter.println("r");
 					opponentWriter.flush();
+				}
+				else if(indata.charAt(0) == '%'){
+					changeName(indata.substring(1));
 				}
 				else if(indata.charAt(0) == 'c'){
 					//Message that should be sent to the clients for translation
