@@ -147,13 +147,14 @@ public class Server extends Thread{
 }
 
 class ClientHandler extends Thread {
-	static int antaltr = 0;
 	Server server;
 	BufferedReader in;
 	BufferedReader opponentReader;
 	PrintWriter ut;
 	PrintWriter opponentWriter;
 	ClientHandler opponent;
+	Long code;
+	int offset = 0;
 	String name;
 
 	public ClientHandler(Socket socket, Server server) {
@@ -164,23 +165,32 @@ class ClientHandler extends Thread {
 			ut = new PrintWriter(socket.getOutputStream());
 			name = in.readLine();
 			System.out.println(name);
+			if(name.equals("Server")){
+				return;
+			}
+			code = Long.parseLong(in.readLine());
+			int j = 2;
 			while(server.contains(name)){
-				ut.println("%%");
-				ut.flush();
-				name = in.readLine();
-			}
-			ut.println("%g");
-			ut.flush();
-			if(!name.equals("Server")){
-			Iterator<Socket> iterator = server.socketsOnline();
-				while(iterator.hasNext()){
-					Socket soc = iterator.next();
-					PrintWriter uta = new PrintWriter(soc.getOutputStream());
-					uta.println("uas" + name);
-					uta.flush();
+				if(!server.contains(name+j)){
+					name += j;
+					break;
 				}
-				server.addUser(socket, this, name);
+				j++;
 			}
+			for(int i = 0; i < name.length(); i++){
+				offset += name.charAt(i) * (i+1);
+			}
+			offset %= 200000;
+			ut.println("%g"+name);
+			ut.flush();
+			Iterator<Socket> iterator = server.socketsOnline();
+			while(iterator.hasNext()){
+				Socket soc = iterator.next();
+				PrintWriter uta = new PrintWriter(soc.getOutputStream());
+				uta.println("uas" + name);
+				uta.flush();
+			}
+			server.addUser(socket, this, name);
 			Iterator<String> itr = server.usersOnline();
 			while(itr.hasNext()){
 				String temp = itr.next();
@@ -238,6 +248,14 @@ class ClientHandler extends Thread {
 		try {
 			while(true){
 				String indata = in.readLine();
+				if(!indata.startsWith(code.toString())){
+					System.err.println(indata);
+					System.err.println(code);
+					System.err.println("Intrångsförsök");
+					removePlayer();
+					break;
+				}
+				indata = indata.substring(code.toString().length());
 				System.out.println(indata);
 				if(indata.equals("exit")){
 					//Remove the listener for this packet
@@ -294,6 +312,7 @@ class ClientHandler extends Thread {
 					System.err.println("Någon har glömt en flagga");
 					System.exit(7);
 				}
+				code += offset;
 			}
 		} 
 		catch (Exception e) {

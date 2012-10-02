@@ -27,6 +27,8 @@ public class Spel {
 	final int port = 5555;
 	String opponent = "";
 	boolean challenger = false;
+	long code = System.currentTimeMillis();
+	int offset = 0;
 	
 	public Spel(ChatClass chat, String Name){
 		try{
@@ -37,7 +39,10 @@ public class Spel {
 			this.chat = chat;
 			ut.println(Name);
 			ut.flush();
+			ut.println(code);
+			ut.flush();
 			name = Name;
+			offset %= 200000;
 		}
 		catch(Exception err){
 			err.printStackTrace();
@@ -49,8 +54,7 @@ public class Spel {
 	} 
 	
 	public void quit(){
-		ut.println("exit");
-		ut.flush();
+		sendMessage("exit");
 		ut.close();
 		try{
 			in.close();
@@ -63,8 +67,7 @@ public class Spel {
 	
 	public void sendChat(String message){
 		message = "cc -n " + name + "¤ -m " + message;
-		ut.println(message);
-		ut.flush();
+		sendMessage(message);
 	}
 	
 	public void acceptChallenge(String name){
@@ -72,8 +75,7 @@ public class Spel {
 		if(accept == 0){
 			opponent = name;
 			challenger = true;
-			ut.println("¤"+name);
-			ut.flush();
+			sendMessage("¤"+name);
 		}
 	}
 	
@@ -123,8 +125,7 @@ public class Spel {
 	}
 	
 	public void challengePlayer(String player){
-		ut.println("!"+player);
-		ut.flush();
+		sendMessage("!"+player);
 	}
 	
 	public static String findMessage(String message){
@@ -139,16 +140,12 @@ public class Spel {
 		return null;
 	}
 	
-	public void changeName(){
-		name = JOptionPane.showInputDialog("Tyvärr är namnet upptaget, välj ett nytt");
-		ut.println(name);
-		ut.flush();
-	}
-	
 	public void reconnect(Socket socket) throws IOException{
 		sock = socket;
 		ut = new PrintWriter(socket.getOutputStream());
 		ut.println(name);
+		ut.flush();
+		ut.println(code);
 		ut.flush();
 		if(opponent.length() > 0 && challenger){
 			challengePlayer(opponent);
@@ -164,7 +161,12 @@ public class Spel {
 		chat.dispose();
 		chat = new Lobby(name);
 	}
-
+	
+	public void sendMessage(String message){
+		ut.println(code+message);
+		ut.flush();
+		code += offset;
+	}
 }
 
 class chat extends Thread{
@@ -209,22 +211,21 @@ class chat extends Thread{
 					spelare.acceptChallenge(command.substring(1));
 				}
 				else if(command.charAt(0) == '%'){
-					if(command.charAt(1) == '%')
-						spelare.changeName();
-					else
-						spelare.chat.setVisible(true);
+					spelare.name = command.substring(2);
+					for(int i = 0; i < spelare.name.length(); i++){
+						spelare.offset += spelare.name.charAt(i) * (i+1);
+					}
+					spelare.chat.setVisible(true);
 				}
 				else if(command.charAt(0) == 'm'){
 					spelare.addToQueue(command.substring(1));
 				}
 				else if(command.charAt(0) == '§'){
 					spelare.opponent = command.substring(1);
-					spelare.ut.println("§" + command.substring(1));
-					spelare.ut.flush();
+					spelare.sendMessage("§" + command.substring(1));
 				}
 				else if(command.charAt(0) == 'r'){
-					spelare.ut.println('r');
-					spelare.ut.flush();
+					spelare.sendMessage("r");
 				}
 				else if(command.charAt(0) == 'p'){
 					String port = command.substring(1);
