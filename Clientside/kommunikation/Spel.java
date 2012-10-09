@@ -40,7 +40,7 @@ public class Spel {
 			ut.flush();
 			ut.println(code);
 			ut.flush();
-			name = in.readLine().substring(1);
+			changeName(in.readLine().substring(1));	//Changes the name to what the server whats
 			new chat(this, sock).start();
 			chat.setVisible(true);
 		}
@@ -71,12 +71,17 @@ public class Spel {
 	}
 	
 	public void acceptChallenge(String name){
-		int accept = JOptionPane.showConfirmDialog(chat, name + " vill utmana dig, accepterar du?", "Utmaning", JOptionPane.YES_NO_OPTION); 
-		if(accept == 0){
-			opponent = name;
-			challenger = true;
-			sendMessage("¤"+name);
+		try{
+			Lobby a = (Lobby) chat; //Makes sure that the player has a Lobby open;
+			int accept = JOptionPane.showConfirmDialog(chat, name + " vill utmana dig, accepterar du?", "Utmaning", JOptionPane.YES_NO_OPTION); 
+			if(accept == 0){
+				opponent = name;
+				challenger = true;
+				sendMessage("¤"+name);
+				//TODO add start of game here
+			}
 		}
+		catch(Exception e){} //Ignore
 	}
 	
 	public void recieveChat(String message){
@@ -217,7 +222,7 @@ class chat extends Thread{
 				else if(command.charAt(1) == 'r')
 						spelare.removePlayer(command.substring(2));
 				}
-				else if(command.charAt(0) == '¤'){
+				else if(command.charAt(0) == '!'){
 					spelare.acceptChallenge(command.substring(1));
 				}
 				else if(command.charAt(0) == '%'){
@@ -229,6 +234,7 @@ class chat extends Thread{
 				else if(command.charAt(0) == '§'){
 					spelare.opponent = command.substring(1);
 					spelare.sendMessage("§" + command.substring(1));
+					//TODO add start of game here
 				}
 				else if(command.charAt(0) == 'r'){
 					spelare.sendMessage("r");

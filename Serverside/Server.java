@@ -164,16 +164,13 @@ class ClientHandler extends Thread {
 					socket.getInputStream()));
 			ut = new PrintWriter(socket.getOutputStream());
 			name = in.readLine();
-			System.out.println(name);
 			if(name.equals("Server")){
 				return;
 			}
 			code = Long.parseLong(in.readLine());
 			name = changeName(name);
-			System.out.println(name);
 			ut.println('%'+name);
 			ut.flush();
-			System.out.println(1);
 			Iterator<Socket> iterator = server.socketsOnline();
 			while(iterator.hasNext()){
 				Socket soc = iterator.next();
@@ -181,9 +178,7 @@ class ClientHandler extends Thread {
 				uta.println("uas" + name);
 				uta.flush();
 			}
-			System.out.println(2);
 			server.addUser(socket, this, name);
-			System.out.println(3);
 			Iterator<String> itr = server.usersOnline();
 			while(itr.hasNext()){
 				String temp = itr.next();
@@ -192,7 +187,6 @@ class ClientHandler extends Thread {
 					this.ut.flush();
 				}
 			}
-			System.out.println(4);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -261,6 +255,7 @@ class ClientHandler extends Thread {
 				if(!indata.startsWith(code.toString())){
 					System.err.println(indata);
 					System.err.println(code);
+					System.err.println(name);
 					System.err.println("Intrångsförsök");
 					removePlayer();
 					break;
@@ -286,7 +281,7 @@ class ClientHandler extends Thread {
 					break;
 				}
 				else if(indata.charAt(0) == '!'){
-					server.getHandler(indata.substring(1)).ut.println("¤"+name);
+					server.getHandler(indata.substring(1)).ut.println("!"+name);
 					server.getHandler(indata.substring(1)).ut.flush();
 				}
 				else if(indata.charAt(0) == '¤'){
@@ -303,8 +298,6 @@ class ClientHandler extends Thread {
 					String name = indata.substring(1);
 					addOpponent(server.getHandler(name),server.getSocket(name));
 					removePlayer();
-					opponentWriter.println("r");
-					opponentWriter.flush();
 				}
 				else if(indata.charAt(0) == '%'){
 					changeName(indata.substring(1));
