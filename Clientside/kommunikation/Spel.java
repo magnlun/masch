@@ -72,6 +72,7 @@ public class Spel {
 	
 	public void acceptChallenge(String name){
 		try{
+			@SuppressWarnings("unused")
 			Lobby a = (Lobby) chat; //Makes sure that the player has a Lobby open;
 			int accept = JOptionPane.showConfirmDialog(chat, name + " vill utmana dig, accepterar du?", "Utmaning", JOptionPane.YES_NO_OPTION); 
 			if(accept == 0){
@@ -165,6 +166,10 @@ public class Spel {
 		JOptionPane.showMessageDialog(chat, message);
 		chat.dispose();
 		chat = new Lobby(name);
+	}
+	
+	public void sendMove(String move){
+		sendMessage('m'+move);
 	}
 	
 	public void sendMessage(String message){

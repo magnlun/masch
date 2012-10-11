@@ -1,0 +1,16 @@
+﻿Behov på spelklient:
+
+Den ska ärva av ChatClass
+
+Den ska ta ett objekt av typen Spel i sin konstruktor och spara den som ett attribut.
+
+Chatmeddelanden ska skickas till Spels metod sendChat
+
+Rörelser skickas till sendMove
+
+reciveChat kan förslagsvis skrivas så här:
+
+text.addText(message, flags.get("-n"));
+
+där text är en ScrollText. Om jag får tid ska jag förklara vad flags är för något. Om jag inte gjort det får du fråga
+
