@@ -37,9 +37,36 @@ public class Lobby extends ChatClass implements ActionListener, MouseListener{
 	HashMap<String,String> colorMap = new HashMap<String,String>();
 	boolean ändra = true;
 
-	public Lobby(String name){
+	public Lobby(String name){ 	
 		model.addColumn("Online");
 		spel = new Spel(this, name);
+		setLayout(new GridBagLayout());
+		GridBagConstraints c = new GridBagConstraints();
+		c.gridwidth = 2;
+		add(text,c);
+		c.fill = GridBagConstraints.HORIZONTAL;
+		chatt = new HintTextField("Chatta här");
+		chatt.addActionListener(this);
+		c.gridy = 1;
+		c.gridwidth = 1;
+		add(combo, c);
+		fillCombo();
+		combo.addActionListener(this);
+		c.gridwidth = 2;
+		c.gridy = 2;
+		add(chatt, c);
+		c.gridy = 0;
+		c.gridx = 2;
+		c.gridheight = 2;
+		add(t,c);
+		pack();
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		t.addMouseListener(this);
+	}
+	
+	public Lobby(String name, Spel player){
+		model.addColumn("Online");
+		spel = player;
 		setLayout(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
 		c.gridwidth = 2;

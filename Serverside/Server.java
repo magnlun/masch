@@ -1,4 +1,5 @@
 import java.net.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Scanner;
@@ -7,9 +8,13 @@ import java.io.*;
 public class Server extends Thread{
 	HashMap<String,Socket> sockets = new HashMap<String,Socket>();
 	HashMap<String,ClientHandler> ClientHandlers = new HashMap<String,ClientHandler>();
+	ArrayList<String> usersOnline = new ArrayList<String>();
+	HashMap<String, String> reconnect;
+	
 	Socket alternativeServer;
 	boolean run = true;
-	final int port = 5555;
+	final int port = 5554;
+	final String breakString = "0102defg5486asdefasdw62485ew13r4";
 	
 	Server(){
 		this.setDaemon(true);
@@ -33,19 +38,50 @@ public class Server extends Thread{
 			}
 		} 
 		catch (Exception e) {
-			shutdown();
 			e.printStackTrace();
+			shutdown();
 		}
 	}
 	
 	public void shutdown(){
+		Object[] itr = sockets.keySet().toArray();
 		if(alternativeServer == null){
 			//No alternative server is known so the server will just die
 			messageToAllPlayers("Dead");
 		}
 		else{
-			messageToAllPlayers("p"+alternativeServer.getPort());
-			messageToAllPlayers(""+alternativeServer.getLocalAddress());
+			try(PrintWriter temp = new PrintWriter(alternativeServer.getOutputStream())){
+				//temp.println("1q");
+				temp.println("q");
+				temp.flush();
+				for(int i = 0; i < itr.length; i++){
+					temp.println(itr[i]);
+					temp.flush();
+				}
+				temp.println(breakString);
+				temp.flush();
+				
+				for(int i = 0; i < itr.length; i++){
+					Object user = itr[i];
+					System.out.println(user);
+					Socket soc = sockets.get(user);
+					PrintWriter PW = new PrintWriter(soc.getOutputStream());
+					PW.println("p"+alternativeServer.getPort());
+					PW.flush();
+					PW.println(""+alternativeServer.getLocalAddress());
+					System.out.println(alternativeServer.getLocalAddress());
+					PW.flush();
+					PW.close();
+				}
+				temp.println("exit");
+				temp.flush();
+				temp.close();
+				Thread.sleep(5000);
+			}
+			catch(Exception err){
+				err.printStackTrace();
+			} //ingore
+			
 		}
 		
 		run = false;
@@ -55,28 +91,60 @@ public class Server extends Thread{
 		catch(Exception e){}
 	}
 	
-	public void addUser(Socket socket, ClientHandler CH, String name){
+	public void addOtherUsers(BufferedReader BR){
+		reconnect = new HashMap<String, String>();
+		try{
+			String name = BR.readLine();
+			while(!name.equals(breakString)){
+				System.out.println(name);
+				String newName = new String(name);
+				int j = 2;
+				while(contains(newName)){
+					if(!contains(newName+j)){
+						newName += j;
+						break;
+					}
+					j++;
+				}
+				reconnect.put(name, newName);
+				name = BR.readLine();
+			}
+		}
+		catch(Exception err){
+			err.printStackTrace();
+		}
+	}
+	
+	public synchronized void addUser(Socket socket, ClientHandler CH, String name){
+		usersOnline.add(name);
 		sockets.put(name, socket);
 		ClientHandlers.put(name, CH);
 	}
 	
-	public Iterator<String> usersOnline(){
-		return sockets.keySet().iterator();
-	}
-	
-	public Iterator<Socket> socketsOnline(){
-		return sockets.values().iterator();
+	public ArrayList<String> usersOnline(){
+		return usersOnline;
 	}
 	
 	public ClientHandler getHandler(String user){
 		return ClientHandlers.get(user);
 	}
+	
 	public Socket getSocket(String user){
 		return sockets.get(user);
 	}
-	public void removeUser(String user){
-		ClientHandlers.remove(user);
-		sockets.remove(user);
+	public synchronized void removeUser(String user){
+		usersOnline.remove(user);
+		try{
+			for(String name : usersOnline){
+				Socket soc = getSocket(name);
+				PrintWriter ut = new PrintWriter(soc.getOutputStream());
+				ut.println("ur" + user);
+				ut.flush();
+			}
+		}
+		catch(Exception err){
+			err.printStackTrace();
+		}
 	}
 	
 	public boolean contains(String user){
@@ -96,8 +164,26 @@ public class Server extends Thread{
 		}
 	}
 	
+	public synchronized void logOut(String name){
+		removeUser(name);
+		sockets.remove(name);
+		ClientHandlers.remove(name);
+	}
+	
 	public void causeException(){
 		throw new NullPointerException();
+	}
+	
+	public void printStatus(){
+		System.out.println("Chattar:");
+		for(String user : usersOnline)
+			System.out.println(user);
+		System.out.println("Anslutna:");
+		Iterator<String> itr = sockets.keySet().iterator();
+		while(itr.hasNext())
+			System.out.println(itr.next());
+		
+		
 	}
 	
 	public static void main(String[] args) {
@@ -121,6 +207,9 @@ public class Server extends Thread{
 			else if(command.equals("quit")){
 				break;
 			}
+			else if(command.equals("status")){
+				server.printStatus();
+			}
 			else{
 				System.err.println("Unkown command");
 			}
@@ -131,18 +220,19 @@ public class Server extends Thread{
 	
 	public void messageToAllPlayers(String message){
 		try{
-			Iterator<Socket> itr = socketsOnline();
-			while(itr.hasNext()){
-				Socket socket = itr.next();
+			for(String name : usersOnline){
+				Socket socket = getSocket(name);
 				PrintWriter temp = new PrintWriter(socket.getOutputStream());
 				temp.println(message);
 				temp.flush();
 			}
 		}
 		catch(Exception e){
-			
+			e.printStackTrace();
 		}
-		
+	}
+	public String getAlias(String name){
+		return reconnect.get(name);
 	}
 }
 
@@ -153,8 +243,8 @@ class ClientHandler extends Thread {
 	PrintWriter ut;
 	PrintWriter opponentWriter;
 	ClientHandler opponent;
-	Long code;
-	int offset = 0;
+	//Long code;
+	//int offset = 0;
 	String name;
 
 	public ClientHandler(Socket socket, Server server) {
@@ -165,25 +255,23 @@ class ClientHandler extends Thread {
 			ut = new PrintWriter(socket.getOutputStream());
 			name = in.readLine();
 			if(name.equals("Server")){
+				//code = (long) 1.0;
 				return;
 			}
-			code = Long.parseLong(in.readLine());
+			//code = Long.parseLong(in.readLine());
 			name = changeName(name);
 			ut.println('%'+name);
 			ut.flush();
-			Iterator<Socket> iterator = server.socketsOnline();
-			while(iterator.hasNext()){
-				Socket soc = iterator.next();
+			for(String user : server.usersOnline()){
+				Socket soc = server.getSocket(user);
 				PrintWriter uta = new PrintWriter(soc.getOutputStream());
-				uta.println("uas" + name);
+				uta.println("uas" + this.name);
 				uta.flush();
 			}
 			server.addUser(socket, this, name);
-			Iterator<String> itr = server.usersOnline();
-			while(itr.hasNext()){
-				String temp = itr.next();
-				if(!temp.equals(name)){
-					this.ut.println("uaq" + temp);
+			for(String user : server.usersOnline()){
+				if(!user.equals(this.name)){
+					this.ut.println("uaq" + user);
 					this.ut.flush();
 				}
 			}
@@ -202,9 +290,9 @@ class ClientHandler extends Thread {
 			j++;
 		}
 		for(int i = 0; i < name.length(); i++){
-			offset += name.charAt(i) * (i+1);
+			//offset += name.charAt(i) * (i+1);
 		}
-		offset %= 200000;
+		//offset %= 200000;
 		return name;
 	}
 	
@@ -222,18 +310,6 @@ class ClientHandler extends Thread {
 	
 	public void removePlayer(){
 		server.removeUser(name);
-		try{
-			Iterator<Socket> iterator = server.socketsOnline();
-			while(iterator.hasNext()){
-				Socket soc = iterator.next();
-				PrintWriter ut = new PrintWriter(soc.getOutputStream());
-				ut.println("ur" + name);
-				ut.flush();
-			}
-		}
-		catch(Exception err){
-			err.printStackTrace();
-		}
 	}
 	
 	public void addOpponent(ClientHandler opponent, Socket opp){
@@ -243,8 +319,9 @@ class ClientHandler extends Thread {
 			opponentReader = new BufferedReader(new InputStreamReader(
 					opp.getInputStream())); 
 		}
-		catch(IOException e){
-			e.printStackTrace();
+		catch(Exception e){
+			ut.println("nc");
+			ut.flush();
 		}
 	}
 
@@ -252,21 +329,24 @@ class ClientHandler extends Thread {
 		try {
 			while(true){
 				String indata = in.readLine();
-				if(!indata.startsWith(code.toString())){
+				/*if(!indata.startsWith(code.toString())){
 					System.err.println(indata);
 					System.err.println(code);
 					System.err.println(name);
 					System.err.println("Intrångsförsök");
-					removePlayer();
+					server.logOut(this.name);
 					break;
-				}
-				indata = indata.substring(code.toString().length());
-				System.out.println(indata);
+				}*/
+				//indata = indata.substring(code.toString().length());
+				System.out.println(name + indata);
 				if(indata.equals("exit")){
 					//Remove the listener for this packet
 					ut.println("Die");
 					ut.flush();
-					removePlayer();
+					server.logOut(this.name);
+					break;
+				}
+				else if(indata.equals("die")){
 					break;
 				}
 				else if(opponentWriter == null && indata.charAt(0) == 'c'){
@@ -298,6 +378,9 @@ class ClientHandler extends Thread {
 					String name = indata.substring(1);
 					addOpponent(server.getHandler(name),server.getSocket(name));
 					removePlayer();
+					server.removeUser(name);
+					opponentWriter.println("yc");
+					opponentWriter.flush();
 				}
 				else if(indata.charAt(0) == '%'){
 					changeName(indata.substring(1));
@@ -313,16 +396,29 @@ class ClientHandler extends Thread {
 				else if(indata.charAt(0) == 'r'){
 					removePlayer();
 				}
-				else{
+				else if(indata.charAt(0) == 'q' && name.equals("Server")){
+					server.addOtherUsers(in);
+				}
+				else if(indata.charAt(0) == 'p'){
+					String opponent = server.getAlias(indata.substring(1));
+					System.out.println("opponent: " + opponent);
+					addOpponent(server.getHandler(opponent),server.getSocket(opponent));
+					ut.flush();
+					opponentWriter.println("§"+name);
+					opponentWriter.flush();
+				}
+				else{ 	
 					System.err.println(indata);
 					System.err.println("Någon har glömt en flagga");
 					System.exit(7);
 				}
-				code += offset;
+				//code += offset;
 			}
 		} 
 		catch (Exception e) {
-			removePlayer();
+			server.logOut(this.name);
+			System.out.println(this.name);
+			e.printStackTrace();
 		}
 	}
 }
