@@ -1,6 +1,7 @@
 package kommunikation;
 import grafik.Lobby;
 import grafik.TappadAnslutning;
+import grafik.TappadAnslutningFrame;
 
 import java.awt.Window;
 import java.io.BufferedReader;
@@ -28,7 +29,7 @@ public class Spel {
 	ChatClass chat;
 	String name;
 	Socket sock;
-	final int port = 5554;
+	final int port = 5555;
 	String opponent = "";
 	boolean challenger = false;
 	Window ansl;
@@ -164,6 +165,8 @@ public class Spel {
 		if(opponent.length() > 0){
 			if(challenger)
 				ansl = new TappadAnslutning(this, chat);
+			else
+				ansl = new TappadAnslutningFrame(this);
 		}
 	}
 	

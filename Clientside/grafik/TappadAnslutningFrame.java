@@ -11,7 +11,7 @@ import javax.swing.JLabel;
 
 import kommunikation.Spel;
 
-public class TappadAnslutningFrame extends JFrame implements ActionListener{
+public class TappadAnslutningFrame extends JFrame implements ActionListener, Runnable{
 
 	/**
 	 * 
@@ -24,6 +24,7 @@ public class TappadAnslutningFrame extends JFrame implements ActionListener{
 	JButton lobby = new JButton("Tillbaka till lobbyn");
 	JButton avslut = new JButton("Avsluta");
 	Spel spelare;
+	boolean run = true;
 	
 	public TappadAnslutningFrame(Spel spelare){
 		this.spelare = spelare;
@@ -47,11 +48,27 @@ public class TappadAnslutningFrame extends JFrame implements ActionListener{
 		this.pack();
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		setVisible(true);
-		this.start();
+		new Thread(this).start();
 	}
 	
-	private void start(){
-		while(true){
+	public void dispose(){
+		run = false;
+		super.dispose();
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		if(e.getSource() == lobby){
+			spelare.returnToLobby();
+		}
+		else{
+			spelare.quit();
+		}
+	}
+
+	@Override
+	public void run() {
+		while(run){
 			try{
 				Thread.sleep(1000);
 		    }
@@ -65,15 +82,6 @@ public class TappadAnslutningFrame extends JFrame implements ActionListener{
 			}
 			reconn.setText("Anslut igen (" + count +")");
 		}
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		if(e.getSource() == lobby){
-			spelare.returnToLobby();
-		}
-		else{
-			spelare.quit();
-		}
+		
 	}
 }
