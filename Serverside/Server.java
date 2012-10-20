@@ -401,10 +401,12 @@ class ClientHandler extends Thread {
 				}
 				else if(indata.charAt(0) == 'p'){
 					String opponent = server.getAlias(indata.substring(1));
-					System.out.println("opponent: " + opponent);
+					String ID = in.readLine();
 					addOpponent(server.getHandler(opponent),server.getSocket(opponent));
 					ut.flush();
-					opponentWriter.println("§"+name);
+					opponentWriter.println("a"+name);
+					opponentWriter.flush();
+					opponentWriter.println(ID);
 					opponentWriter.flush();
 				}
 				else{ 	
@@ -417,8 +419,6 @@ class ClientHandler extends Thread {
 		} 
 		catch (Exception e) {
 			server.logOut(this.name);
-			System.out.println(this.name);
-			e.printStackTrace();
 		}
 	}
 }

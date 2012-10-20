@@ -91,6 +91,7 @@ public class TappadAnslutning extends JDialog implements ActionListener{
 	
 	public void reconnect(){
 		spelare.sendMessage("p"+spelare.getOpponent());
+		spelare.sendID();
 		try {
 			Thread.sleep(1000);
 		} 

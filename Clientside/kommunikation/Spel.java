@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 
 import javax.swing.JOptionPane;
 
@@ -29,12 +30,13 @@ public class Spel {
 	ChatClass chat;
 	String name;
 	Socket sock;
-	final int port = 5555;
+	final int port = 5554;
 	String opponent = "";
 	boolean challenger = false;
 	Window ansl;
 	KommQueue commands = new KommQueue();
 	chat process;
+	int sessionID = 0;
 	//long code = System.currentTimeMillis();
 	//int offset = 0;
 	
@@ -74,18 +76,20 @@ public class Spel {
 	}
 	
 	public void acceptChallenge(String name){
-		try{
-			@SuppressWarnings("unused")
-			Lobby a = (Lobby) chat; //Makes sure that the player has a Lobby open;
+		if(sessionID == 0){
 			int accept = JOptionPane.showConfirmDialog(chat, name + " vill utmana dig, accepterar du?", "Utmaning", JOptionPane.YES_NO_OPTION); 
 			if(accept == 0){
 				opponent = name;
 				challenger = true;
 				sendMessage("¤"+name);
+				Random r = new Random();
+				int id = Math.abs(r.nextInt());
+				if(id == 0)
+					id++;
+				sendMessage("ci"+id);
 				//TODO add start of game here
 			}
 		}
-		catch(Exception e){} //Ignore
 	}
 	
 	public void recieveChat(String message){
@@ -160,6 +164,10 @@ public class Spel {
 		changeName(in.readLine().substring(1));	//Changes the name to what the server whats
 	}
 	
+	public void sendID(){
+		sendMessage(Integer.toString(sessionID));
+	}
+	
 	public void reconnect(Socket socket) throws IOException{
 		connect(socket, this.name);
 		if(opponent.length() > 0){
@@ -171,8 +179,7 @@ public class Spel {
 	}
 	
 	public void returnToLobby(){
-		chat.dispose();
-		chat = new Lobby(this.name, this);
+		newLobby();
 	}
 	
 	public String getOpponent(){
@@ -208,6 +215,12 @@ public class Spel {
 		//code += offset;
 	}
 	
+	public void newLobby(){
+		chat.dispose();
+		sessionID = 0;
+		chat = new Lobby(this.name,this);
+	}
+	
 	public void changeName(String name){
 		this.name = name;
 		/*for(int i = 0; i < name.length(); i++){
@@ -231,14 +244,17 @@ class chat extends Thread{
 	}
 	
 	public boolean processCommand(String command) throws NumberFormatException, UnknownHostException, IOException{
+		//Used: !,%,§,c,i,m,n,p,r,s,u,y
 		if(command.equals("Die")){
 			return false;
 		}
 		else if(command.equals("Draw")){
 			spelare.message("Det blev lika!");
+			spelare.newLobby();
 		}
 		else if(command.equals("Loose")){
 			spelare.message("Tyvärr förlorade du");
+			spelare.newLobby();
 		}
 		else if(command.equals("Dead")){
 			spelare.kill();
@@ -276,11 +292,24 @@ class chat extends Thread{
 			catch(NullPointerException e){}	//If it is not open ignore it
 			//TODO add start of game here
 		}
-		else if(command.charAt(0) == 'r'){
-			spelare.sendMessage("r");
-		}
 		else if(command.charAt(0) == 's'){
 			System.out.println(command);
+		}
+		else if(command.charAt(0) == 'i'){
+			spelare.sessionID = Integer.parseInt(command.substring(1));
+		}
+		else if(command.charAt(0) == 'a'){
+			String ID = rd.readLine();
+			if(spelare.sessionID == Integer.parseInt(ID)){
+				spelare.opponent = command.substring(1);
+				spelare.sendMessage("§" + command.substring(1));
+				try {
+					spelare.ansl.dispose();
+				}
+				catch(NullPointerException e){}	//If it is not open ignore it				
+			}
+			else
+				spelare.sendMessage("nc");
 		}
 		else if(command.charAt(0) == 'p'){
 			spelare.sendMessage("die");
@@ -306,7 +335,6 @@ class chat extends Thread{
 			String command;
 			try {
 				command = rd.readLine();
-				System.out.println(command);
 				cont = processCommand(command);
 			} 
 			catch (IOException e) {

@@ -38,6 +38,7 @@ public class TappadAnslutningFrame extends JFrame implements ActionListener, Run
 		this.add(new JLabel("Vad vill du göra?"),gc2);
 		GridBagConstraints gc3 = new GridBagConstraints();
 		gc3.gridy = 2;
+		reconn.addActionListener(this);
 		lobby.addActionListener(this);
 		avslut.addActionListener(this);
 		this.add(reconn, gc3);
@@ -61,9 +62,11 @@ public class TappadAnslutningFrame extends JFrame implements ActionListener, Run
 		if(e.getSource() == lobby){
 			spelare.returnToLobby();
 		}
-		else{
+		else if(e.getSource() == avslut){
 			spelare.quit();
 		}
+		startCount *= 2;
+		count = startCount;
 	}
 
 	@Override
@@ -76,7 +79,7 @@ public class TappadAnslutningFrame extends JFrame implements ActionListener, Run
 		    	 e.printStackTrace();
 		    }
 			count--;
-			if(count == 0){
+			if(count <= 0){
 				startCount *= 2;
 				count = startCount;
 			}
