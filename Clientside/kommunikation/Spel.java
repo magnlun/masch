@@ -1,4 +1,5 @@
 package kommunikation;
+import grafik.Game;
 import grafik.Lobby;
 import grafik.TappadAnslutning;
 import grafik.TappadAnslutningFrame;
@@ -10,31 +11,25 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Random;
 
 import javax.swing.JOptionPane;
 
 import other.ChatClass;
-import other.KommQueue;
 
 
 
 public class Spel {
-	List<String> kö = Collections.synchronizedList(new LinkedList<String>());
 	BufferedReader in;
 	PrintWriter ut;
 	ChatClass chat;
 	String name;
 	Socket sock;
-	final int port = 5554;
+	final int port = 5555;
 	String opponent = "";
 	boolean challenger = false;
 	Window ansl;
-	KommQueue commands = new KommQueue();
 	chat process;
 	int sessionID = 0;
 	//long code = System.currentTimeMillis();
@@ -53,10 +48,6 @@ public class Spel {
 			err.printStackTrace();
 		}
 	}
-	
-	public void addToQueue(String string){
-		kö.add(string);
-	} 
 	
 	public void quit(){
 		sendMessage("exit");
@@ -87,7 +78,8 @@ public class Spel {
 				if(id == 0)
 					id++;
 				sendMessage("ci"+id);
-				//TODO add start of game here
+				chat.dispose();
+				chat = new Game(true, this);
 			}
 		}
 	}
@@ -135,6 +127,13 @@ public class Spel {
 			}
 		}
 		return rc;
+	}
+	
+	public void reciveMove(String move){
+		try{
+			((Game)chat).reciveMove(move);
+		}
+		catch(Exception err){}
 	}
 	
 	public void challengePlayer(String player){
@@ -205,7 +204,7 @@ public class Spel {
 	}
 	
 	public void sendMove(String move){
-		sendMessage('m'+move);
+		sendMessage("cm"+move);
 	}
 	
 	public void sendMessage(String message){
@@ -227,6 +226,11 @@ public class Spel {
 			offset += name.charAt(i) * (i+1);
 		}*/
 		chat.setTitle(name);
+	}
+	
+	public void win(){
+		JOptionPane.showMessageDialog(chat, "Grattis du vann!");
+		newLobby();
 	}
 }
 
@@ -281,7 +285,7 @@ class chat extends Thread{
 			spelare.changeName(command.substring(1));
 		}
 		else if(command.charAt(0) == 'm'){
-			spelare.addToQueue(command.substring(1));
+			spelare.reciveMove(command.substring(1));
 		}
 		else if(command.charAt(0) == '§'){
 			spelare.opponent = command.substring(1);
@@ -290,7 +294,8 @@ class chat extends Thread{
 				spelare.ansl.dispose();
 			}
 			catch(NullPointerException e){}	//If it is not open ignore it
-			//TODO add start of game here
+			spelare.chat.dispose();
+			spelare.chat = new Game(false, spelare);
 		}
 		else if(command.charAt(0) == 's'){
 			System.out.println(command);
