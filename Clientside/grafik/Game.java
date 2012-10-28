@@ -54,7 +54,7 @@ public class Game extends ChatClass implements ActionListener{
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setVisible(true);		
 	}
-	
+
 	public void win(){
 		for(int i = 0; i < values.length; i++){
 			for(int j = 0; j < values[i].length-2; j++)

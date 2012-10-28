@@ -82,7 +82,7 @@ public class TappadAnslutning extends JDialog implements ActionListener{
 			reconnect();
 		}
 		else if(e.getSource() == lobby){
-			spelare.returnToLobby();
+			spelare.newLobby();
 		}
 		else{
 			spelare.quit();
@@ -100,20 +100,15 @@ public class TappadAnslutning extends JDialog implements ActionListener{
 		try {
 			command = spelare.readLine();
 			while(!(command.equals("yc") || command.equals("nc"))){
-				System.out.println(command);
 				spelare.processCommand(command);
 				command = spelare.readLine();
 			}
-			System.out.println("Command: " + command);
 			if(command.equals("yc")){
-				System.out.println("Ta bort");
 				run = false;
 				setModal(false);
 				dispose();
 			}
 			
-		} catch (IOException e) {
-			e.printStackTrace();	//TODO Ta bort sen (bara här för felkoll)
-		}
+		} catch (IOException e) {}
 	}
 }

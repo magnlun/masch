@@ -26,7 +26,8 @@ public class Spel {
 	ChatClass chat;
 	String name;
 	Socket sock;
-	final int port = 5555;
+	int port = 5554;
+	String ip = "192.168.0.11";
 	String opponent = "";
 	boolean challenger = false;
 	Window ansl;
@@ -37,7 +38,7 @@ public class Spel {
 	
 	public Spel(ChatClass chat, String Name){
 		try{
-			sock = new Socket("192.168.0.11",port);
+			sock = new Socket(ip,port);
 			this.chat = chat;
 			connect(sock, Name);
 			process = new chat(this, sock);
@@ -177,10 +178,6 @@ public class Spel {
 		}
 	}
 	
-	public void returnToLobby(){
-		newLobby();
-	}
-	
 	public String getOpponent(){
 		return opponent;
 	}
@@ -218,6 +215,8 @@ public class Spel {
 		chat.dispose();
 		sessionID = 0;
 		chat = new Lobby(this.name,this);
+		sendMessage("a");
+		sendMessage("b");
 	}
 	
 	public void changeName(String name){
@@ -248,7 +247,7 @@ class chat extends Thread{
 	}
 	
 	public boolean processCommand(String command) throws NumberFormatException, UnknownHostException, IOException{
-		//Used: !,%,§,c,i,m,n,p,r,s,u,y
+		//Used: !,%,§,a,b,c,i,m,n,p,r,s,u,y
 		if(command.equals("Die")){
 			return false;
 		}
@@ -263,6 +262,9 @@ class chat extends Thread{
 		else if(command.equals("Dead")){
 			spelare.kill();
 			return false;
+		}
+		else if(command.charAt(0) == 'b'){
+			spelare.ansl = new TappadAnslutning(spelare, spelare.chat);
 		}
 		else if(command.charAt(0) == 'y'){
 		}
@@ -318,10 +320,10 @@ class chat extends Thread{
 		}
 		else if(command.charAt(0) == 'p'){
 			spelare.sendMessage("die");
-			String port = command.substring(1);
-			String ip = rd.readLine().substring(1);
+			spelare.port = Integer.parseInt(command.substring(1));
+			spelare.ip = rd.readLine().substring(1);
 			spelare.removePlayer(null);	//Remove all players
-			Socket socket = new Socket(ip, Integer.parseInt(port));
+			Socket socket = new Socket(spelare.ip, spelare.port);
 			rd = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			spelare.reconnect(socket);
 		}

@@ -60,7 +60,7 @@ public class TappadAnslutningFrame extends JFrame implements ActionListener, Run
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if(e.getSource() == lobby){
-			spelare.returnToLobby();
+			spelare.newLobby();
 		}
 		else if(e.getSource() == avslut){
 			spelare.quit();

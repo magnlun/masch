@@ -34,6 +34,7 @@ public class Lobby extends ChatClass implements ActionListener, MouseListener{
 	int players = 0;
 	JTable t = new JTable(model);
 	JComboBox<String> combo = new JComboBox<String>();
+	HashMap<String, Boolean> online = new HashMap<String, Boolean>();
 	HashMap<String,String> colorMap = new HashMap<String,String>();
 	boolean ändra = true;
 
@@ -60,7 +61,7 @@ public class Lobby extends ChatClass implements ActionListener, MouseListener{
 		c.gridheight = 2;
 		add(t,c);
 		pack();
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		t.addMouseListener(this);
 	}
 	
@@ -129,6 +130,7 @@ public class Lobby extends ChatClass implements ActionListener, MouseListener{
 		}
 		for(int i = 0; i < t.getRowCount(); i++){
 			if(t.getValueAt(i, 0).equals(player)){
+				online.put(player, false);
 				model.removeRow(i);
 				text.removePlayer(player);
 				break;
@@ -137,8 +139,11 @@ public class Lobby extends ChatClass implements ActionListener, MouseListener{
 	}
 	
 	public void addPlayers(String player){
-		text.addPlayer(player);
-		model.addRow(new Object[] {player.substring(1)});
+		if(online.get(player.substring(1)) == null || !online.get(player.substring(1))){
+			online.put(player.substring(1), true);
+			text.addPlayer(player);
+			model.addRow(new Object[] {player.substring(1)});
+		}
 	}
 
 	/**
