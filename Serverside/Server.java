@@ -238,12 +238,14 @@ class ClientHandler extends Thread {
 	PrintWriter ut;
 	PrintWriter opponentWriter;
 	ClientHandler opponent;
+	Socket socket;
 	//Long code;
 	//int offset = 0;
 	String name;
 
 	public ClientHandler(Socket socket, Server server) {
 		this.server = server;
+		this.socket = socket;
 		try {
 			in = new BufferedReader(new InputStreamReader(
 					socket.getInputStream()));
@@ -383,6 +385,7 @@ class ClientHandler extends Thread {
 					opponent = null;
 					opponentReader = null;
 					server.messageToAllPlayers("uas" + this.name);
+					server.addUser(socket, this, name);
 				}
 				else if(indata.charAt(0) == '§'){
 					//Player B starts to play with player A

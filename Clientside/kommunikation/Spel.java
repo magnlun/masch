@@ -342,6 +342,7 @@ class chat extends Thread{
 			String command;
 			try {
 				command = rd.readLine();
+				System.out.println(command);
 				cont = processCommand(command);
 			} 
 			catch (IOException e) {

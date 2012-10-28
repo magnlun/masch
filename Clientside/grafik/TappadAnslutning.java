@@ -75,6 +75,11 @@ public class TappadAnslutning extends JDialog implements ActionListener{
 			reconn.setText("Anslut igen (" + count +")");
 		}
 	}
+	
+	public void dispose(){
+		run = false;
+		super.dispose();
+	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
