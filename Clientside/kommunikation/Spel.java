@@ -26,7 +26,7 @@ public class Spel {
 	ChatClass chat;
 	String name;
 	Socket sock;
-	int port = 5554;
+	int port = 5555;
 	String ip = "192.168.0.11";
 	String opponent = "";
 	boolean challenger = false;
@@ -80,7 +80,7 @@ public class Spel {
 					id++;
 				sendMessage("ci"+id);
 				chat.dispose();
-				chat = new Game(true, this);
+				chat = new Game(true, this, this.name);
 			}
 		}
 	}
@@ -197,7 +197,7 @@ public class Spel {
 	public void message(String message){
 		JOptionPane.showMessageDialog(chat, message);
 		chat.dispose();
-		chat = new Lobby(name);
+		chat = new Lobby(name, this);
 	}
 	
 	public void sendMove(String move){
@@ -297,7 +297,7 @@ class chat extends Thread{
 			}
 			catch(NullPointerException e){}	//If it is not open ignore it
 			spelare.chat.dispose();
-			spelare.chat = new Game(false, spelare);
+			spelare.chat = new Game(false, spelare, spelare.name);
 		}
 		else if(command.charAt(0) == 's'){
 			System.out.println(command);

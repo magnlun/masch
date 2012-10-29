@@ -39,35 +39,19 @@ public class Lobby extends ChatClass implements ActionListener, MouseListener{
 	boolean ändra = true;
 
 	public Lobby(String name){ 	
-		model.addColumn("Online");
+		defaultStart(name);
 		spel = new Spel(this, name);
-		setLayout(new GridBagLayout());
-		GridBagConstraints c = new GridBagConstraints();
-		c.gridwidth = 2;
-		add(text,c);
-		c.fill = GridBagConstraints.HORIZONTAL;
-		chatt = new HintTextField("Chatta här");
-		chatt.addActionListener(this);
-		c.gridy = 1;
-		c.gridwidth = 1;
-		add(combo, c);
-		fillCombo();
-		combo.addActionListener(this);
-		c.gridwidth = 2;
-		c.gridy = 2;
-		add(chatt, c);
-		c.gridy = 0;
-		c.gridx = 2;
-		c.gridheight = 2;
-		add(t,c);
-		pack();
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		t.addMouseListener(this);
 	}
 	
 	public Lobby(String name, Spel player){
-		model.addColumn("Online");
+		setTitle(name);
+		defaultStart(name);
 		spel = player;
+		setVisible(true);
+	}
+	
+	public void defaultStart(String name){
+		model.addColumn("Online");
 		setLayout(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
 		c.gridwidth = 2;
@@ -90,7 +74,6 @@ public class Lobby extends ChatClass implements ActionListener, MouseListener{
 		pack();
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		t.addMouseListener(this);
-		setVisible(true);
 	}
 	
 	public void fillCombo(){
@@ -171,10 +154,7 @@ public class Lobby extends ChatClass implements ActionListener, MouseListener{
 	}
 
 	@Override
-	public void mouseClicked(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void mouseClicked(MouseEvent e) {}
 
 	@Override
 	public void mousePressed(MouseEvent e) {
@@ -184,20 +164,11 @@ public class Lobby extends ChatClass implements ActionListener, MouseListener{
 	}
 
 	@Override
-	public void mouseReleased(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void mouseReleased(MouseEvent e) {}
 
 	@Override
-	public void mouseEntered(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void mouseEntered(MouseEvent e) {}
 
 	@Override
-	public void mouseExited(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void mouseExited(MouseEvent e) {}
 }

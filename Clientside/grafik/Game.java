@@ -31,7 +31,8 @@ public class Game extends ChatClass implements ActionListener{
 	ScrollText text = new ScrollText();
 	HintTextField chatt = new HintTextField("Chatta här");
 	
-	public Game(boolean turn, Spel spel){
+	public Game(boolean turn, Spel spel, String name){
+		setTitle(name);
 		JPanel panel = new JPanel(new GridLayout(size,size));
 		setLayout(new GridBagLayout());
 		GridBagConstraints gc = new GridBagConstraints();
