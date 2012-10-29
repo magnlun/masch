@@ -260,8 +260,8 @@ class ClientHandler extends Thread {
 			ut.println('%'+name);
 			ut.flush();
 			server.messageToAllPlayers("uas" + this.name);
-			server.addUser(socket, this, name);
 			requestUsers();
+			server.addUser(socket, this, name);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -269,11 +269,14 @@ class ClientHandler extends Thread {
 	
 	public void requestUsers(){
 		for(String user : server.usersOnline()){
-			if(!user.equals(this.name)){
-				this.ut.println("uaq" + user);
-				this.ut.flush();
-			}
+			ut.println("uaq" + user);
 		}
+		ut.flush();
+	}
+	
+	public void requestNumberOfUsers(){
+		ut.println("d"+(server.usersOnline().size()-1));
+		ut.flush();
 	}
 	
 	public void logOut(){
@@ -353,6 +356,7 @@ class ClientHandler extends Thread {
 					break;
 				}
 				else if(indata.equals("die")){
+					logOut();
 					break;
 				}
 				else if(opponentWriter == null && indata.charAt(0) == 'c'){
@@ -386,6 +390,9 @@ class ClientHandler extends Thread {
 					opponentReader = null;
 					server.messageToAllPlayers("uas" + this.name);
 					server.addUser(socket, this, name);
+				}
+				else if(indata.charAt(0) == 'd'){
+					requestNumberOfUsers();
 				}
 				else if(indata.charAt(0) == '§'){
 					//Player B starts to play with player A

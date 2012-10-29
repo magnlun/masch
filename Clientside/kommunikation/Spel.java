@@ -26,7 +26,7 @@ public class Spel {
 	ChatClass chat;
 	String name;
 	Socket sock;
-	int port = 5555;
+	int port = 5554;
 	String ip = "192.168.0.11";
 	String opponent = "";
 	boolean challenger = false;
@@ -52,14 +52,7 @@ public class Spel {
 	
 	public void quit(){
 		sendMessage("exit");
-		ut.close();
-		try{
-			in.close();
-			sock.close();
-		}
-		catch(Exception err){
-			
-		}
+		chat.dispose();
 	}
 	
 	public void sendChat(String message){
@@ -236,6 +229,7 @@ public class Spel {
 class chat extends Thread{
 	BufferedReader rd;
 	Spel spelare;
+	int users = 0;
 	chat(Spel spelare, Socket socket){
 		this.spelare = spelare;
 		try{
@@ -247,8 +241,11 @@ class chat extends Thread{
 	}
 	
 	public boolean processCommand(String command) throws NumberFormatException, UnknownHostException, IOException{
-		//Used: !,%,§,a,b,c,i,m,n,p,r,s,u,y
+		//Used: !,%,§,a,b,c,d,i,m,n,p,r,s,u,y
 		if(command.equals("Die")){
+			rd.close();
+			spelare.ut.close();
+			spelare.sock.close();
 			return false;
 		}
 		else if(command.equals("Draw")){
@@ -266,6 +263,11 @@ class chat extends Thread{
 		else if(command.charAt(0) == 'b'){
 			spelare.ansl = new TappadAnslutning(spelare, spelare.chat);
 		}
+		else if(command.charAt(0) == 'd'){
+			if(Integer.parseInt(command.substring(1)) != users){
+				spelare.sendMessage("a");
+			}
+		}
 		else if(command.charAt(0) == 'y'){
 		}
 		else if(command.charAt(0) == 'n'){
@@ -276,9 +278,12 @@ class chat extends Thread{
 		else if(command.charAt(0) == 'u'){
 			if(command.charAt(1) == 'a'){
 				spelare.addPlayer(command.substring(2));
+				users++;
 			}
-		else if(command.charAt(1) == 'r')
+			else if(command.charAt(1) == 'r'){
 				spelare.removePlayer(command.substring(2));
+				users--;
+			}
 		}
 		else if(command.charAt(0) == '!'){
 			spelare.acceptChallenge(command.substring(1));
@@ -345,10 +350,11 @@ class chat extends Thread{
 				System.out.println(command);
 				cont = processCommand(command);
 			} 
-			catch (IOException e) {
+			catch (Exception e) {
+				e.printStackTrace();
 				spelare.quit();
 				spelare.kill();
-				e.printStackTrace();
+				cont = false;
 			}
 		}
 		System.exit(0);

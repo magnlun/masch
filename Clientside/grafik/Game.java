@@ -38,7 +38,7 @@ public class Game extends ChatClass implements ActionListener{
 		GridBagConstraints gc = new GridBagConstraints();
 		this.spel = spel;
 		yourturn = turn;
-		for(int i=0; i<size; i++){
+		for(int i = 0; i < size; i++){
 			for(int j = 0; j < size; j++){
 				buttons[i][j] = new Button(new int[] {i,j}, this);
 				panel.add(buttons[i][j]);
@@ -46,9 +46,11 @@ public class Game extends ChatClass implements ActionListener{
 		}
 		
 		add(panel, gc);
+		gc.fill = GridBagConstraints.HORIZONTAL;
 		gc.gridy++;
 		add(text,gc);
 		gc.gridy++;
+		gc.gridwidth = 2;
 		add(chatt,gc);
 		chatt.addActionListener(this);
 		pack();

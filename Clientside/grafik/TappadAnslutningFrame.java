@@ -63,6 +63,7 @@ public class TappadAnslutningFrame extends JFrame implements ActionListener, Run
 			spelare.newLobby();
 		}
 		else if(e.getSource() == avslut){
+			dispose();
 			spelare.quit();
 		}
 		startCount *= 2;

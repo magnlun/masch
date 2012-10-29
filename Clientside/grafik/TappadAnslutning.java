@@ -90,6 +90,7 @@ public class TappadAnslutning extends JDialog implements ActionListener{
 			spelare.newLobby();
 		}
 		else{
+			dispose();
 			spelare.quit();
 		}
 	}
