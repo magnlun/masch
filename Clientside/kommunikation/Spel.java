@@ -33,8 +33,6 @@ public class Spel {
 	Window ansl;
 	chat process;
 	int sessionID = 0;
-	//long code = System.currentTimeMillis();
-	//int offset = 0;
 	
 	public Spel(ChatClass chat, String Name){
 		try{
@@ -152,8 +150,6 @@ public class Spel {
 		ut = new PrintWriter(sock.getOutputStream());
 		ut.println(name);
 		ut.flush();
-		//ut.println(code);
-		//ut.flush();
 		changeName(in.readLine().substring(1));	//Changes the name to what the server whats
 	}
 	
@@ -198,10 +194,8 @@ public class Spel {
 	}
 	
 	public void sendMessage(String message){
-		//ut.println(code+message);
 		ut.println(message);
 		ut.flush();
-		//code += offset;
 	}
 	
 	public void newLobby(){
@@ -214,9 +208,6 @@ public class Spel {
 	
 	public void changeName(String name){
 		this.name = name;
-		/*for(int i = 0; i < name.length(); i++){
-			offset += name.charAt(i) * (i+1);
-		}*/
 		chat.setTitle(name);
 	}
 	

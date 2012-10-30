@@ -51,7 +51,6 @@ public class Server extends Thread{
 		}
 		else{
 			try(PrintWriter temp = new PrintWriter(alternativeServer.getOutputStream())){
-				//temp.println("1q");
 				temp.println("q");
 				temp.flush();
 				for(int i = 0; i < itr.length; i++){
@@ -76,7 +75,7 @@ public class Server extends Thread{
 				temp.close();
 				Thread.sleep(5000);
 			}
-			catch(Exception err){			} //ingore
+			catch(Exception err){} //ingore
 			
 		}
 		
@@ -127,6 +126,7 @@ public class Server extends Thread{
 	public Socket getSocket(String user){
 		return sockets.get(user);
 	}
+	
 	public synchronized void removeUser(String user){
 		usersOnline.remove(user);
 		try{
@@ -239,8 +239,6 @@ class ClientHandler extends Thread {
 	PrintWriter opponentWriter;
 	ClientHandler opponent;
 	Socket socket;
-	//Long code;
-	//int offset = 0;
 	String name;
 
 	public ClientHandler(Socket socket, Server server) {
@@ -252,10 +250,8 @@ class ClientHandler extends Thread {
 			ut = new PrintWriter(socket.getOutputStream());
 			name = in.readLine();
 			if(name.equals("Server")){
-				//code = (long) 1.0;
 				return;
 			}
-			//code = Long.parseLong(in.readLine());
 			name = changeName(name);
 			ut.println('%'+name);
 			ut.flush();
@@ -296,23 +292,7 @@ class ClientHandler extends Thread {
 			}
 			j++;
 		}
-		for(int i = 0; i < name.length(); i++){
-			//offset += name.charAt(i) * (i+1);
-		}
-		//offset %= 200000;
 		return name;
-	}
-	
-	public void close(){
-		try{
-			in.close();
-			ut.close();
-			opponentReader.close();
-			opponentWriter.close();
-		}
-		catch(Exception e){
-			//try at least
-		}
 	}
 	
 	public void removePlayer(){
@@ -337,17 +317,10 @@ class ClientHandler extends Thread {
 	public void run() {
 		try {
 			while(true){
+				
 				String indata = in.readLine();
-				/*if(!indata.startsWith(code.toString())){
-					System.err.println(indata);
-					System.err.println(code);
-					System.err.println(name);
-					System.err.println("Intrångsförsök");
-					server.logOut(this.name);
-					break;
-				}*/
-				//indata = indata.substring(code.toString().length());
 				System.out.println(name + indata);
+				
 				if(indata.equals("exit")){
 					//Remove the listener for this packet
 					ut.println("Die");
@@ -442,7 +415,6 @@ class ClientHandler extends Thread {
 					System.err.println("Någon har glömt en flagga");
 					System.exit(7);
 				}
-				//code += offset;
 			}
 		} 
 		catch (Exception e) {
