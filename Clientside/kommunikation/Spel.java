@@ -49,8 +49,8 @@ public class Spel {
 	}
 	
 	public void quit(){
-		sendMessage("exit");
 		chat.dispose();
+		sendMessage("exit");
 	}
 	
 	public void sendChat(String message){
@@ -338,13 +338,11 @@ class chat extends Thread{
 			String command;
 			try {
 				command = rd.readLine();
-				System.out.println(command);
 				cont = processCommand(command);
 			} 
 			catch (Exception e) {
-				e.printStackTrace();
-				spelare.quit();
 				spelare.kill();
+				spelare.quit();
 				cont = false;
 			}
 		}
